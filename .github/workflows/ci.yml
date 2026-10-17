@@ -1,0 +1,56 @@
+name: WinDebloat CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest-and-unit-tests:
+    name: Manifest CI, UI Build & Engine Unit Tests (§9)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/windebloat-ui/package-lock.json
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build Frontend Assets
+        run: |
+          npm --prefix apps/windebloat-ui ci
+          npm --prefix apps/windebloat-ui run build
+      - name: Run Schema, Denylist, and Engine Unit Tests
+        run: |
+          cargo test -p windebloat-schema -p windebloat-engine -p windebloat-ipc
+          cargo test -p windebloat-ipc --features require-signed-peers
+      - name: Build All Binaries and Verify Base Manifest
+        run: |
+          cargo build --workspace
+          .\target\debug\windebloat-cli.exe verify-manifest manifests\base_manifest.json
+
+  runner-integration:
+    name: Runner Integration & Idempotency (§9)
+    runs-on: windows-latest
+    needs: manifest-and-unit-tests
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build CLI
+        run: cargo build -p windebloat-cli
+      - name: Verify Dry-Run, Apply, Second-Pass Skipped Idempotency, Detect, and Drift
+        run: |
+          .\target\debug\windebloat-cli.exe --sandbox dry-run --profile enterprise --target-user all-profiles
+          .\target\debug\windebloat-cli.exe --sandbox apply --profile enterprise --target-user all-profiles --log-file run1.jsonl
+          .\target\debug\windebloat-cli.exe --sandbox detect --profile enterprise --target-user all-profiles
+          .\target\debug\windebloat-cli.exe --sandbox drift --json

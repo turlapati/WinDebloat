@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://windebloat.dev/schemas/journal.schema.json",
+  "title": "WinDebloat Undo Journal",
+  "description": "Schema for %ProgramData%\\WinDebloat\\journal.json",
+  "type": "object",
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entry_id",
+          "bundle_id",
+          "action_index",
+          "target",
+          "prior",
+          "applied_at",
+          "run_id",
+          "context",
+          "state",
+          "sha256"
+        ],
+        "properties": {
+          "entry_id": { "type": "string" },
+          "bundle_id": { "type": "string" },
+          "action_index": { "type": "integer", "minimum": 0 },
+          "target": { "type": "string" },
+          "prior": {},
+          "written": {},
+          "applied_at": { "type": "string", "format": "date-time" },
+          "run_id": { "type": "string" },
+          "context": { "type": "string", "enum": ["interactive", "headless"] },
+          "state": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Skipped",
+              "Captured",
+              "Applied",
+              "Verified",
+              "Failed",
+              "RolledBack",
+              "Undone"
+            ]
+          },
+          "error": { "type": ["string", "null"] },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- Override from the command line:
+       wix build installer/windebloat.wxs -arch x64
+         -d ProductVersion=0.9.101
+         -d DisplayVersion=2026-10-17_Beta_0.9.101
+         -d BinDir=C:\path\to\target\release
+         -d RepoRoot=C:\path\to\WinDebloat
+         -d IconFile=C:\path\to\icon.ico -->
+  <?ifndef ProductVersion?>
+  <?define ProductVersion = "0.9.101" ?>
+  <?endif?>
+  <?ifndef DisplayVersion?>
+  <?define DisplayVersion = "2026-10-17_Beta_0.9.101" ?>
+  <?endif?>
+  <?ifndef BinDir?>
+  <?define BinDir = "..\target\release" ?>
+  <?endif?>
+  <?ifndef RepoRoot?>
+  <?define RepoRoot = ".." ?>
+  <?endif?>
+  <?ifndef IconFile?>
+  <?define IconFile = "..\apps\windebloat-ui\src-tauri\icons\icon.ico" ?>
+  <?endif?>
+
+  <Package
+    Name="WinDebloat"
+    Manufacturer="Hari Turlapati"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="8A5C3D21-7E4B-4D19-A264-9F1E8B30C7D2"
+    Scope="perMachine">
+
+    <SummaryInformation
+      Description="Windows configuration, privacy, and debloat utility ($(var.DisplayVersion))"
+      Manufacturer="Hari Turlapati" />
+
+    <MajorUpgrade
+      AllowSameVersionUpgrades="yes"
+      Schedule="afterInstallValidate"
+      DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <!-- Also automatically remove any pre-release 3.0.0 installation that used the legacy UpgradeCode -->
+    <Upgrade Id="4B94F95D-8D51-4F26-9958-A4728D64B0C3">
+      <UpgradeVersion
+        Minimum="0.0.0"
+        Maximum="99.0.0"
+        IncludeMinimum="yes"
+        IncludeMaximum="yes"
+        OnlyDetect="no"
+        Property="LEGACY_WINDEBLOAT_FOUND" />
+    </Upgrade>
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.exe" SourceFile="$(var.IconFile)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
+    <Property Id="ARPCOMMENTS" Value="Release $(var.DisplayVersion)" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/turlapati/WinDebloat" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/turlapati/WinDebloat/issues" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="REINSTALLMODE" Value="amus" />
+
+    <!-- §8: Install location MUST be %ProgramFiles%\WinDebloat so the daemon image path check cannot be satisfied from a user-writable folder -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="WinDebloat">
+        <Component Id="MainExecutable" Guid="B8535D31-598A-4D25-8353-D2653E49D947">
+          <File Id="WinDebloatExe" Source="$(var.BinDir)\windebloat.exe" KeyPath="yes">
+            <Shortcut
+              Id="WinDebloatStartMenuShortcut"
+              Name="WinDebloat"
+              Description="Windows configuration, privacy, and debloat utility"
+              Directory="ProgramMenuFolder"
+              WorkingDirectory="INSTALLFOLDER"
+              Icon="AppIcon.exe"
+              IconIndex="0"
+              Advertise="yes" />
+          </File>
+        </Component>
+        <Component Id="DaemonExecutable" Guid="D18C6D6B-9E88-4E2A-9B0D-7773828F359D">
+          <File Id="WinDebloatDaemonExe" Source="$(var.BinDir)\windebloat-daemon.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="CliExecutable" Guid="A9922C93-4326-4475-88D3-F7C73790B1A4">
+          <File Id="WinDebloatCliExe" Source="$(var.BinDir)\windebloat-cli.exe" KeyPath="yes" />
+          <Environment
+            Id="PATH"
+            Name="PATH"
+            Value="[INSTALLFOLDER]"
+            Permanent="no"
+            Part="last"
+            Action="set"
+            System="yes" />
+        </Component>
+        <Component Id="LicenseFiles" Guid="749902DF-BB81-46AB-B0F5-44C74A903A1A">
+          <File Id="LicenseFile" Source="$(var.RepoRoot)\LICENSE" KeyPath="yes" />
+          <File Id="NoticeFile" Source="$(var.RepoRoot)\NOTICE" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="CommonAppDataFolder" />
+    <StandardDirectory Id="System64Folder" />
+
+    <!-- Ensure C:\ProgramData\WinDebloat and any existing journal.json are readable by Builtin Users (*S-1-5-32-545) while remaining writable only by Administrators/SYSTEM -->
+    <CustomAction
+      Id="RepairProgramDataAcl"
+      Directory="System64Folder"
+      ExeCommand='"[System64Folder]icacls.exe" "[CommonAppDataFolder]WinDebloat" /grant *S-1-5-32-545:(OI)(CI)(RX) /T /C /Q'
+      Execute="deferred"
+      Impersonate="no"
+      Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="RepairProgramDataAcl" Before="InstallFinalize" Condition="NOT Installed OR UPGRADINGPRODUCTCODE OR REINSTALL" />
+    </InstallExecuteSequence>
+
+    <Feature Id="ProductFeature" Title="WinDebloat" Level="1">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="DaemonExecutable" />
+      <ComponentRef Id="CliExecutable" />
+      <ComponentRef Id="LicenseFiles" />
+    </Feature>
+  </Package>
+</Wix>

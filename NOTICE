@@ -1,0 +1,14 @@
+WinDebloat
+Copyright (c) 2026 Hari Turlapati
+
+This product includes manifest bundle definitions, package family identifiers,
+and Windows registry policy configurations derived from:
+
+- Win11Debloat (https://github.com/Raphire/Win11Debloat)
+  Copyright (c) Raphire — Licensed under the MIT License.
+
+- Chris Titus Tech's Windows Utility (https://github.com/ChrisTitusTech/winutil)
+  Copyright (c) Chris Titus — Licensed under the MIT License.
+
+- Windows10Debloater (https://github.com/Sycnex/Windows10Debloater)
+  Copyright (c) Sycnex — Licensed under the MIT License.

@@ -1,0 +1,26 @@
+[package]
+name = "windebloat-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "windebloat"
+path = "src/main.rs"
+
+[features]
+# Enable only for Authenticode-signed production builds (see docs/RELEASING.md).
+require-signed-peers = ["windebloat-ipc/require-signed-peers"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+windebloat-schema = { path = "../../../crates/windebloat-schema" }
+windebloat-engine = { path = "../../../crates/windebloat-engine" }
+windebloat-ipc = { path = "../../../crates/windebloat-ipc" }
+tauri = { version = "2.0", features = ["custom-protocol"] }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+windows.workspace = true

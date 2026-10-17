@@ -1,0 +1,21 @@
+[package]
+name = "windebloat-ipc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+# Reject peer binaries that carry no Authenticode signature. Enable this only for
+# builds whose binaries are actually signed (see docs/RELEASING.md). Default
+# (community) builds accept unsigned peers, but only from %ProgramFiles%\WinDebloat.
+require-signed-peers = []
+
+[dependencies]
+windebloat-schema = { path = "../windebloat-schema" }
+windebloat-engine = { path = "../windebloat-engine" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+rand.workspace = true
+hex.workspace = true
+windows.workspace = true

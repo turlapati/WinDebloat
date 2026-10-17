@@ -1,0 +1,5880 @@
+{
+  "manifest_version": 3,
+  "manifest_name": "WinDebloat Comprehensive Power-User Manifest",
+  "bundles": [
+    {
+      "manifest_version": 3,
+      "id": "copilot_disable",
+      "display_name": "Disable Windows Copilot & Remove Copilot App",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Removes the Microsoft Copilot app and disables Windows Copilot shell integration via user and machine policies.",
+      "side_effects": [
+        "Win+C shortcut and Copilot taskbar button are removed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+          "name": "TurnOffWindowsCopilot",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+          "name": "TurnOffWindowsCopilot",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowCopilotButton",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Copilot_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NHT9RB2F4HD"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "recall_disable",
+      "display_name": "Disable Windows Recall Policy (AI Snapshots)",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Disables Windows AI Data Analysis (Recall continuous screen snapshots) and turns off Saving Snapshots via machine policy.",
+      "side_effects": [
+        "Recall snapshot capture and semantic timeline search are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 26100,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAIDataAnalysis",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "TurnOffSavingSnapshots",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "recall_capability_remove",
+      "display_name": "Remove Windows Recall Payload (DISM Feature)",
+      "category": "AI features",
+      "rating": "expert",
+      "description": "Disables the Recall optional feature payload via DISM so its AI binaries are unprovisioned from the OS image.",
+      "side_effects": [
+        "Requires a system reboot to finalize DISM feature state.",
+        "Re-enabling requires Windows Update or installation media."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 26100,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "Recall",
+          "feature_enabled": false,
+          "probe": {
+            "kind": "feature_state",
+            "expected": false
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "click_to_do_disable",
+      "display_name": "Disable Click to Do (AI Screen Overlay)",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Disables the Windows 11 24H2+ 'Click to Do' interactive AI screen analysis overlay.",
+      "side_effects": [
+        "Win+Click / Snipping Tool Click to Do AI text and image actions are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 26100,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableClickToDo",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ClickToDoEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "paint_ai_disable",
+      "display_name": "Disable AI Features in Microsoft Paint (Cocreator & Image Creator)",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Disables Cocreator, Image Creator, and Generative Fill AI features inside Microsoft Paint via policy.",
+      "side_effects": [
+        "AI image generation buttons in Paint are hidden or disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableImageCreator",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableCocreator",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableGenerativeFill",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "notepad_ai_disable",
+      "display_name": "Disable AI Rewrite & Summarize in Windows Notepad",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Disables Copilot Rewrite / Cowriter AI cloud integration in Windows Notepad.",
+      "side_effects": [
+        "Right-click 'Rewrite with Notepad' and AI credit menu in Notepad are hidden."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\WindowsNotepad",
+          "name": "DisableAIFeatures",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "edge_ai_disable",
+      "display_name": "Disable Microsoft Edge Copilot Sidebar & Page Context AI",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Hides the Copilot sidebar hub in Microsoft Edge and blocks Edge from sending active page context to Copilot.",
+      "side_effects": [
+        "Edge sidebar Copilot button and AI compose/summarize prompts are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "HubsSidebarEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "CopilotCDPPageContext",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "CopilotPageContext",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_ai_hub_and_devhome",
+      "display_name": "Remove Copilot+ AI Hub & Windows Dev Home",
+      "category": "AI features",
+      "rating": "recommended",
+      "description": "Removes the preinstalled Microsoft AI Hub and Windows Dev Home apps for all users.",
+      "side_effects": [
+        "Dev Home dashboard and AI Hub showcase app are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Windows.AIHub_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NHT9RB2F4HD"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Windows.DevHome_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9N8MHTPHNGVV"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "telemetry_minimal",
+      "display_name": "Reduce Diagnostic Telemetry & Advertising ID",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Lowers diagnostic data collection to the minimum allowed by OS SKU, disables Advertising ID, and disables Customer Experience Improvement Program tasks.",
+      "side_effects": [
+        "Personalized ads and diagnostic feedback frequency are disabled.",
+        "Windows Insider builds may require diagnostic data re-enabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": [],
+        "effective_on": [
+          "Enterprise",
+          "EnterpriseS",
+          "Education"
+        ]
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "AllowTelemetry",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+          "name": "Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        },
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "diagtrack_service_disable",
+      "display_name": "Disable Connected User Experiences and Telemetry Service (DiagTrack)",
+      "category": "Privacy and telemetry",
+      "rating": "limited",
+      "description": "Sets the DiagTrack background telemetry service startup type to Disabled.",
+      "side_effects": [
+        "Xbox achievements and Microsoft Store error reporting may stop syncing until re-enabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "service_startup",
+          "service_name": "DiagTrack",
+          "start_type": "disabled",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "disabled"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "dmwappushservice_disable",
+      "display_name": "Disable WAP Push Message Routing Telemetry Service (dmwappushservice)",
+      "category": "Privacy and telemetry",
+      "rating": "limited",
+      "description": "Disables the Device Management Wireless Application Protocol (WAP) Push message routing service used by telemetry.",
+      "side_effects": [
+        "MDM push notifications on cellular-connected devices may not wake the MDM client."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "service_startup",
+          "service_name": "dmwappushservice",
+          "start_type": "disabled",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "disabled"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "bing_lock_and_suggestions_disable",
+      "display_name": "Disable Lock Screen Tips, Fun Facts & Silent Promoted Apps",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Stops Windows Content Delivery Manager from silently installing promoted Store apps and showing tips/ads on the lock screen.",
+      "side_effects": [
+        "Windows Spotlight lock screen fun facts and suggested Start menu apps are hidden."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SilentInstalledAppsEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338388Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338389Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "RotatingLockScreenOverlayEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338387Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "activity_history_disable",
+      "display_name": "Disable Activity History & Cloud Timeline Sync",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Disables Windows Activity Feed collection, local activity history publishing, and cloud activity uploads.",
+      "side_effects": [
+        "Cross-device app/document activity history is no longer recorded."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "EnableActivityFeed",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "PublishUserActivities",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "UploadUserActivities",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "location_tracking_disable",
+      "display_name": "Disable System Location Services & Sensor Scripting",
+      "category": "Privacy and telemetry",
+      "rating": "limited",
+      "description": "Disables Windows Location Provider and location scripting across all apps via machine policy.",
+      "side_effects": [
+        "Weather widgets, Maps, and browser geolocation will not receive automatic OS location coordinates."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors",
+          "name": "DisableLocation",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors",
+          "name": "DisableLocationScripting",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "find_my_device_disable",
+      "display_name": "Disable Find My Device Cloud Location Tracking",
+      "category": "Privacy and telemetry",
+      "rating": "limited",
+      "description": "Disables periodic cloud location beacon reporting used by Microsoft's Find My Device feature.",
+      "side_effects": [
+        "You will not be able to locate this PC remotely from account.microsoft.com/devices."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FindMyDevice",
+          "name": "AllowFindMyDevice",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "tailored_experiences_and_ink_disable",
+      "display_name": "Disable Tailored Experiences & Inking/Typing Harvesting",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Blocks Microsoft from using diagnostic data for tailored tips/ads and stops implicit typing/inking dictionary harvesting.",
+      "side_effects": [
+        "Cloud-personalized tips and cloud handwriting telemetry are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableTailoredExperiencesWithDiagnosticData",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+          "name": "TailoredExperiencesWithDiagnosticDataEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitInkCollection",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitTextCollection",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "app_launch_tracking_disable",
+      "display_name": "Disable App Launch Tracking & Settings App Suggestions",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Prevents Windows from tracking app launches to reorder Start menu items and hides promoted suggestions inside the Settings app.",
+      "side_effects": [
+        "Start menu 'Most used' app list will no longer track launched executables."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_TrackProgs",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338393Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-353694Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-353696Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "settings_365_ads_and_home_disable",
+      "display_name": "Disable Microsoft 365 Ads & OneDrive Nag Banner in Settings",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Disables Microsoft 365 / OneDrive subscription upsell banners and post-update 'Welcome Experience' nag screens.",
+      "side_effects": [
+        "Full-screen 'Finish setting up your device' prompts after Windows Updates are suppressed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-310093Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement",
+          "name": "ScoobeSystemSettingEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "edge_ads_and_msn_feed_disable",
+      "display_name": "Disable Microsoft Edge Sponsored Shortcuts, Shopping & Telemetry",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Disables sponsored links on the Edge New Tab page, turns off the Edge Shopping Assistant, and disables Edge personalization reporting.",
+      "side_effects": [
+        "Edge New Tab page will not inject sponsored partner tiles or shopping popups."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "NewTabPageHideDefaultTopSites",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "EdgeShoppingAssistantEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "PersonalizationReportingEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "ConfigureDoNotTrack",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "bing_search_disable",
+      "display_name": "Disable Bing Web Results in Windows Search",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Disables Bing web search suggestions in the Start Menu search box so searches stay strictly local and fast.",
+      "side_effects": [
+        "Start Menu search queries will only search local files, apps, and settings."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": [
+          "EEA"
+        ]
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "DisableSearchBoxSuggestions",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "BingSearchEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "store_search_suggestions_disable",
+      "display_name": "Disable Microsoft Store App Suggestions in 'Open With' & Search",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Prevents Windows from prompting to look for an app in the Microsoft Store when opening unknown file extensions.",
+      "side_effects": [
+        "'Look for an app in the Microsoft Store' dialog option is suppressed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "NoUseStoreOpenWith",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "widgets_disable",
+      "display_name": "Disable Taskbar Widgets & MSN News Feed (Windows 11)",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Disables the Windows 11 Widgets board and background WebExperience news feed via machine policy.",
+      "side_effects": [
+        "Win+W and the taskbar Weather/Widgets icon are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+          "name": "AllowNewsAndInterests",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "win10_news_and_interests_disable",
+      "display_name": "Disable Taskbar 'News and Interests' Weather Feed (Windows 10)",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Disables the Windows 10 'News and Interests' taskbar weather/news flyout via user setting and machine policy.",
+      "side_effects": [
+        "Windows 10 taskbar weather widget and MSN news flyout are hidden."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": [],
+        "os_max_build": 21999
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Feeds",
+          "name": "ShellFeedsTaskbarViewMode",
+          "value_type": "DWORD",
+          "value": 2,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 2
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds",
+          "name": "EnableFeeds",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_align_left",
+      "display_name": "Align Windows 11 Taskbar Icons to the Left",
+      "category": "Start and taskbar",
+      "rating": "limited",
+      "description": "Moves the Start button and pinned taskbar icons from the center of the screen back to the classic left corner.",
+      "side_effects": [
+        "Taskbar alignment changes from Center to Left."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAl",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_search_hide",
+      "display_name": "Hide Search Box / Icon from Taskbar",
+      "category": "Start and taskbar",
+      "rating": "limited",
+      "description": "Hides the Search box/button from the taskbar (you can still search at any time by pressing the Windows key and typing).",
+      "side_effects": [
+        "Taskbar search button is hidden; press Win key or Win+S to search."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "SearchboxTaskbarMode",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_search_icon_only",
+      "display_name": "Show Compact Search Icon Only on Taskbar",
+      "category": "Start and taskbar",
+      "rating": "limited",
+      "description": "Replaces the wide taskbar search bar with a compact magnifying glass icon.",
+      "side_effects": [
+        "Taskbar search box shrinks to an icon-only button."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "SearchboxTaskbarMode",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_hide_taskview",
+      "display_name": "Hide Task View (Virtual Desktops) Button from Taskbar",
+      "category": "Start and taskbar",
+      "rating": "limited",
+      "description": "Hides the Task View button on the taskbar (Win+Tab shortcut still works).",
+      "side_effects": [
+        "Task View icon is hidden from the taskbar."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowTaskViewButton",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_hide_chat_meetnow",
+      "display_name": "Hide Chat (Personal Teams) & 'Meet Now' Icon from Taskbar",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Hides the consumer Teams Chat icon on Windows 11 and the Skype 'Meet Now' system tray icon on Windows 10.",
+      "side_effects": [
+        "Consumer Chat / Meet Now taskbar buttons are hidden."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarMn",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+          "name": "HideSCAMeetNow",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "start_disable_recommended",
+      "display_name": "Disable Start Menu 'Recommended' Section & Recent File Tracking",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Disables Start Menu 'Recommended' tips/promotions and stops tracking recently opened documents in Start and Jump Lists.",
+      "side_effects": [
+        "Start menu 'Recommended' feed and recent document suggestions are cleared."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "HideRecommendedSection",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_IrisRecommendations",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_TrackDocs",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "start_disable_phone_link",
+      "display_name": "Disable Phone Link Companion Flyout in Start Menu",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Hides the mobile Phone Link companion sidebar attached to the right side of the Windows 11 Start Menu.",
+      "side_effects": [
+        "Start menu no longer shows the Phone Link status pane next to Start."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22621,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Start\\Companions\\Microsoft.YourPhone_8wekyb3d8bbwe",
+          "name": "IsEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_enable_end_task",
+      "display_name": "Enable 'End Task' Option in Taskbar Right-Click Menu",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Adds an 'End task' command directly when right-clicking any app icon on the Windows 11 taskbar without opening Task Manager.",
+      "side_effects": [
+        "Right-clicking any running app on the taskbar shows 'End task'."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22621,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings",
+          "name": "TaskbarEndTask",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_last_active_click",
+      "display_name": "Enable 'Last Active Click' Window Cycling on Taskbar Icons",
+      "category": "Start and taskbar",
+      "rating": "recommended",
+      "description": "Clicking an app icon with multiple open windows immediately switches to the last active window instead of requiring a second click on the thumbnail preview.",
+      "side_effects": [
+        "Clicking a grouped taskbar icon cycles directly between its open windows."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "LastActiveClick",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "taskbar_uncombine_buttons",
+      "display_name": "Never Combine Taskbar Buttons & Show Window Labels",
+      "category": "Start and taskbar",
+      "rating": "limited",
+      "description": "Configures the primary and multi-monitor taskbars to never combine window buttons and always show window title labels.",
+      "side_effects": [
+        "Each open window gets its own labeled taskbar button."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarGlomLevel",
+          "value_type": "DWORD",
+          "value": 2,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 2
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "MMTaskbarGlomLevel",
+          "value_type": "DWORD",
+          "value": 2,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 2
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "classic_context_menu",
+      "display_name": "Restore Classic Windows 10 Right-Click Context Menu",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Restores the full right-click context menu in File Explorer and Desktop without needing to click 'Show more options'.",
+      "side_effects": [
+        "Replaces the compact Windows 11 context menu with the full classic shell menu."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+          "name": "",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_show_extensions_and_hidden",
+      "display_name": "Always Show File Extensions in File Explorer",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Configures File Explorer to always display known file type extensions (prevents '.pdf.exe' spoofing).",
+      "side_effects": [
+        "All files in Explorer show their full extension (e.g. .exe, .txt, .json)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "HideFileExt",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_show_hidden_files",
+      "display_name": "Show Hidden Files and Folders in File Explorer",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Configures File Explorer to show hidden files and folders such as AppData and dotfiles.",
+      "side_effects": [
+        "Hidden files and folders (e.g., AppData) are visible in File Explorer."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Hidden",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_launch_to_this_pc",
+      "display_name": "Open File Explorer to 'This PC' Instead of Home / Quick Access",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Sets the default startup view of File Explorer (Win+E) to 'This PC' (drives and folders) instead of the Home / Quick Access feed.",
+      "side_effects": [
+        "Opening a new File Explorer window starts at 'This PC'."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "LaunchTo",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_hide_home_and_gallery",
+      "display_name": "Hide 'Home' and 'Gallery' from File Explorer Navigation Pane",
+      "category": "Explorer",
+      "rating": "limited",
+      "description": "Unpins the 'Gallery' and 'Home' cloud-integrated items from the left navigation sidebar in Windows 11 File Explorer.",
+      "side_effects": [
+        "Gallery and Home nodes are hidden from the File Explorer left sidebar."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22621,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_hide_onedrive_nav",
+      "display_name": "Hide OneDrive from File Explorer Navigation Pane",
+      "category": "Explorer",
+      "rating": "limited",
+      "description": "Unpins the OneDrive cloud folder entry from the File Explorer left navigation tree.",
+      "side_effects": [
+        "OneDrive icon is hidden from the File Explorer sidebar."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_hide_duplicate_removable_drives",
+      "display_name": "Hide Duplicate Removable USB Drives in Explorer Sidebar",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Prevents removable USB drives from appearing twice in the File Explorer navigation pane (once under 'This PC' and again at the bottom).",
+      "side_effects": [
+        "Removable drives appear only under 'This PC' in the navigation pane."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Desktop\\NameSpace\\DelegateFolders\\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}",
+          "name": "",
+          "value_type": "DELETE",
+          "value": null,
+          "probe": {
+            "kind": "registry_absent"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_disable_drag_tray",
+      "display_name": "Disable Windows 11 Top-of-Screen File Drag Share Tray",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Disables the Windows 11 'Drag Tray' share overlay that drops down from the top of the screen whenever you drag a file.",
+      "side_effects": [
+        "Dragging a file near the top of the screen no longer triggers the Share bar."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22621,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\DragTray",
+          "name": "IsEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_drive_letters_first",
+      "display_name": "Show Drive Letters Before Drive Names (e.g. '(C:) Local Disk')",
+      "category": "Explorer",
+      "rating": "limited",
+      "description": "Displays drive letters at the beginning of drive labels in File Explorer for faster scanning by power users.",
+      "side_effects": [
+        "Drives display as '(C:) Local Disk' instead of 'Local Disk (C:)'."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+          "name": "ShowDriveLettersFirst",
+          "value_type": "DWORD",
+          "value": 4,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 4
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "explorer_hide_context_clutter",
+      "display_name": "Hide 'Give access to', 'Include in library' & 'Share' Context Menu Items",
+      "category": "Explorer",
+      "rating": "limited",
+      "description": "Removes legacy 'Give access to', 'Include in library', and modern 'Share' clutter from File Explorer right-click menus.",
+      "side_effects": [
+        "Right-click menu is cleaner and loads faster."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+          "name": "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+          "name": "{7ad84985-87b4-4a16-be58-8b72a5b390f7}",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+          "name": "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "win10_hide_3d_objects_folder",
+      "display_name": "Hide '3D Objects' Folder from This PC (Windows 10)",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Hides the unused '3D Objects' special folder from 'This PC' and the File Explorer navigation pane on Windows 10.",
+      "side_effects": [
+        "The 3D Objects folder is hidden from This PC view."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": [],
+        "os_max_build": 21999
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\\PropertyBag",
+          "name": "ThisPCPolicy",
+          "value_type": "SZ",
+          "value": "Hide",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "Hide"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "dark_theme_enable",
+      "display_name": "Enable System & App Dark Mode",
+      "category": "Appearance",
+      "rating": "limited",
+      "description": "Sets both Windows shell surfaces (Taskbar/Start) and Win32/UWP app themes to Dark Mode.",
+      "side_effects": [
+        "Switches current user theme from Light to Dark."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "AppsUseLightTheme",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "SystemUsesLightTheme",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_transparency",
+      "display_name": "Disable Window & Taskbar Transparency Effects (Mica / Acrylic)",
+      "category": "Appearance",
+      "rating": "limited",
+      "description": "Disables Acrylic/Mica blur transparency across the Taskbar, Start Menu, and Settings windows to reduce DWM GPU overhead.",
+      "side_effects": [
+        "Window backgrounds become solid opaque surfaces."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "EnableTransparency",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_animations",
+      "display_name": "Disable Taskbar & Window Transition Animations",
+      "category": "Appearance",
+      "rating": "limited",
+      "description": "Disables taskbar sliding animations and window minimize/maximize animations for snappy UI responsiveness.",
+      "side_effects": [
+        "Windows and menus open and close instantaneously without fade/slide transitions."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAnimations",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Desktop\\WindowMetrics",
+          "name": "MinAnimate",
+          "value_type": "SZ",
+          "value": "0",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "0"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "desktop_spotlight_disable",
+      "display_name": "Disable Windows Spotlight Desktop Wallpaper & 'Learn About This Picture' Icon",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Removes the permanent 'Learn about this picture' icon from the Desktop and disables Windows Spotlight desktop wallpaper collection.",
+      "side_effects": [
+        "'Learn about this picture' desktop icon is removed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableSpotlightCollectionOnDesktop",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel",
+          "name": "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "alt_tab_hide_edge_tabs",
+      "display_name": "Show Only Open Windows (No Browser Tabs) in Alt+Tab",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Prevents Microsoft Edge from flooding the Alt+Tab window switcher with individual browser tabs.",
+      "side_effects": [
+        "Alt+Tab only cycles between actual application windows."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "MultiTaskingAltTabFilter",
+          "value_type": "DWORD",
+          "value": 3,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 3
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_sticky_keys_prompt",
+      "display_name": "Disable Sticky Keys (5x Shift) & Filter Keys Popup Prompts",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Disables the disruptive Sticky Keys and Filter Keys modal prompts when pressing Shift rapidly in games or editors.",
+      "side_effects": [
+        "Pressing Shift 5 times or holding Right Shift for 8 seconds no longer interrupts fullscreen apps."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Accessibility\\StickyKeys",
+          "name": "Flags",
+          "value_type": "SZ",
+          "value": "506",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "506"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Accessibility\\Keyboard Response",
+          "name": "Flags",
+          "value_type": "SZ",
+          "value": "122",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "122"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Accessibility\\ToggleKeys",
+          "name": "Flags",
+          "value_type": "SZ",
+          "value": "58",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "58"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_mouse_acceleration",
+      "display_name": "Disable Mouse Acceleration ('Enhance Pointer Precision')",
+      "category": "Appearance",
+      "rating": "limited",
+      "description": "Disables Windows pointer acceleration curve so physical mouse movement maps 1:1 to screen pixels (ideal for gaming and CAD).",
+      "side_effects": [
+        "Mouse cursor speed is linear; takes full effect after sign-out or reboot."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Mouse",
+          "name": "MouseSpeed",
+          "value_type": "SZ",
+          "value": "0",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "0"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Mouse",
+          "name": "MouseThreshold1",
+          "value_type": "SZ",
+          "value": "0",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "0"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Mouse",
+          "name": "MouseThreshold2",
+          "value_type": "SZ",
+          "value": "0",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "0"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_game_dvr_and_bar",
+      "display_name": "Disable Xbox Game DVR Background Recording & Controller Bar Hook",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Disables background Game DVR video capture and stops the Xbox Guide button from launching the Game Bar overlay.",
+      "side_effects": [
+        "Win+Alt+R background clip recording is disabled; reduces frame-time spikes in games."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "System\\GameConfigStore",
+          "name": "GameDVR_Enabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+          "name": "AllowGameDVR",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+          "name": "AppCaptureEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\GameBar",
+          "name": "UseNexusForGameBarEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_snap_assist_flyout",
+      "display_name": "Disable Window Maximize Hover Snap Layouts Flyout",
+      "category": "Appearance",
+      "rating": "limited",
+      "description": "Disables the Snap Layouts popup menu that appears when hovering the mouse over a window's Maximize button.",
+      "side_effects": [
+        "Hovering over Maximize no longer triggers the Snap Layouts grid popup (Win+Z still works)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 22000,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "EnableSnapBar",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "wu_no_auto_reboot_logged_on",
+      "display_name": "Prevent Automatic Windows Update Reboots While Logged In",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Configures Windows Update policy so scheduled update installations never forcibly reboot the PC while a user is signed in.",
+      "side_effects": [
+        "Pending security updates wait for you to manually restart."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "NoAutoRebootWithLoggedOnUsers",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "wu_disable_delivery_optimization_p2p",
+      "display_name": "Disable Windows Update Peer-to-Peer (P2P) Delivery Optimization",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Sets Windows Update Delivery Optimization to HTTP-only (0) so your PC does not upload update chunks to other PCs on the LAN or Internet.",
+      "side_effects": [
+        "Saves background upload bandwidth; updates download directly from Microsoft CDN."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+          "name": "DODownloadMode",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "wu_disable_latest_updates_asap",
+      "display_name": "Disable 'Get the latest updates as soon as they're available' Preview Toggle",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Opts out of early non-security preview rollouts ('Continuous Innovation' waves) so only stable monthly cumulative updates are installed automatically.",
+      "side_effects": [
+        "Preview feature rollouts wait until the regular Patch Tuesday release."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings",
+          "name": "IsContinuousInnovationOptedIn",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_device_auto_app_download",
+      "display_name": "Prevent Automatic OEM Companion App Downloads on USB Plug-in",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Stops Windows from automatically fetching OEM companion bloatware (e.g. Razer Synapse, HP Smart, Logitech stubs) when plugging in peripherals.",
+      "side_effects": [
+        "Hardware drivers still install, but promotional OEM companion Store apps are not auto-installed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Device Metadata",
+          "name": "PreventDeviceMetadataFromNetwork",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_fast_startup",
+      "display_name": "Disable Fast Startup (Hybrid Hibernation) for Clean Boots",
+      "category": "Windows Update",
+      "rating": "limited",
+      "description": "Disables Hiberboot so 'Shut down' performs a true full kernel shutdown instead of saving kernel state to hiberfil.sys.",
+      "side_effects": [
+        "Fixes driver state bugs and dual-boot disk locks; cold boot takes 2-3 seconds longer."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+          "name": "HiberbootEnabled",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_modern_standby_network",
+      "display_name": "Disable Network Activity During Modern Standby Sleep",
+      "category": "Windows Update",
+      "rating": "limited",
+      "description": "Prevents Windows laptops from staying connected to Wi-Fi and draining battery or running updates while the lid is closed in Modern Standby (S0).",
+      "side_effects": [
+        "Prevents overnight laptop battery drain and hot-bag wakeups."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9",
+          "name": "ACSettingIndex",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9",
+          "name": "DCSettingIndex",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_storage_sense",
+      "display_name": "Disable Automatic Storage Sense Background Sweeps",
+      "category": "Windows Update",
+      "rating": "limited",
+      "description": "Disables automatic background Storage Sense runs so Windows does not automatically purge your Recycle Bin or Downloads folder.",
+      "side_effects": [
+        "Temporary files and Downloads are only deleted when you manually clean them."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+          "name": "01",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "wordpad_capability_remove",
+      "display_name": "Remove Legacy WordPad Capability",
+      "category": "Optional features",
+      "rating": "expert",
+      "description": "Removes the deprecated Microsoft.Windows.WordPad~~~~0.0.1.0 Windows capability on builds prior to 24H2.",
+      "side_effects": [
+        "WordPad (wordpad.exe) is removed; .rtf files must open in another editor."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": [],
+        "os_max_build": 26099
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "capability_remove",
+          "capability_name": "Microsoft.Windows.WordPad~~~~0.0.1.0",
+          "probe": {
+            "kind": "capability_absent"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "add_capability"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_steps_recorder_and_math_input",
+      "display_name": "Remove Legacy Steps Recorder & Math Input Panel Capabilities",
+      "category": "Optional features",
+      "rating": "expert",
+      "description": "Removes the deprecated Steps Recorder (psr.exe) and Math Input Panel optional capabilities via DISM.",
+      "side_effects": [
+        "Steps Recorder (psr.exe) and Math Input Panel are unprovisioned."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "capability_remove",
+          "capability_name": "App.StepsRecorder~~~~0.0.1.0",
+          "probe": {
+            "kind": "capability_absent"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "add_capability"
+          }
+        },
+        {
+          "type": "capability_remove",
+          "capability_name": "MathRecognizer~~~~0.0.1.0",
+          "probe": {
+            "kind": "capability_absent"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "add_capability"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_windows_sandbox",
+      "display_name": "Enable Windows Sandbox (Isolated Disposable VM)",
+      "category": "Optional features",
+      "rating": "expert",
+      "description": "Enables the built-in Windows Sandbox lightweight desktop virtualization feature on Pro/Enterprise editions.",
+      "side_effects": [
+        "Requires hardware virtualization enabled in BIOS and a system reboot."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "Core",
+          "CoreSingleLanguage"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "Containers-DisposableClientVM",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_wsl",
+      "display_name": "Enable Windows Subsystem for Linux 2 (WSL + Virtual Machine Platform)",
+      "category": "Optional features",
+      "rating": "expert",
+      "description": "Enables both Microsoft-Windows-Subsystem-Linux and VirtualMachinePlatform via DISM so WSL 2 Linux distributions work out of the box.",
+      "side_effects": [
+        "Requires hardware virtualization enabled in BIOS and a system reboot."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "Microsoft-Windows-Subsystem-Linux",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        },
+        {
+          "type": "optional_feature",
+          "feature_name": "VirtualMachinePlatform",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_hyperv_virtualization",
+      "display_name": "Enable Microsoft Hyper-V Virtualization Platform",
+      "category": "Optional features",
+      "rating": "expert",
+      "description": "Enables the full Microsoft Hyper-V hypervisor and management tools on Windows Pro/Enterprise/Education editions.",
+      "side_effects": [
+        "Requires hardware virtualization in BIOS and a system reboot."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "Core",
+          "CoreSingleLanguage"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "Microsoft-Hyper-V-All",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_dotnet_framework_35",
+      "display_name": "Enable .NET Framework 3.5 (Includes .NET 2.0 & 3.0)",
+      "category": "Optional features",
+      "rating": "limited",
+      "description": "Enables the legacy .NET Framework 3.5 runtime required by many older Win32 applications and games.",
+      "side_effects": [
+        "Downloads and enables NetFx3 components via DISM."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "NetFx3",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_legacy_directplay",
+      "display_name": "Enable DirectPlay Legacy Gaming Component",
+      "category": "Optional features",
+      "rating": "limited",
+      "description": "Enables the DirectX DirectPlay optional feature required by classic late-90s and 2000s PC games.",
+      "side_effects": [
+        "Enables LegacyComponents / DirectPlay via DISM."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "optional_feature",
+          "feature_name": "DirectPlay",
+          "feature_enabled": true,
+          "probe": {
+            "kind": "feature_state",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "inverse_feature"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_clipchamp",
+      "display_name": "Remove Microsoft Clipchamp Video Editor",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes the preinstalled Clipchamp cloud video editor app for all users and deprovisions it from new user profiles.",
+      "side_effects": [
+        "Clipchamp must be reinstalled from Microsoft Store if needed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Clipchamp.Clipchamp_yxz26nhyzhsrt",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9P1J8S7CCWWT"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_bing_news_weather",
+      "display_name": "Remove MSN News and MSN Weather",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes the preinstalled Microsoft News and Bing Weather UWP apps.",
+      "side_effects": [
+        "Weather live tiles and Microsoft Start News app are removed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingNews_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingWeather_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3Q2"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_bing_suite_extra",
+      "display_name": "Remove Bing Finance, Sports, Food, Health, Travel, Translator & Bing Search",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes all remaining preinstalled Bing content apps (Money/Finance, Sports, Food & Drink, Health & Fitness, Travel, Translator, and Bing Search provider).",
+      "side_effects": [
+        "Preinstalled Bing portal apps are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingFinance_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingSports_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingFoodAndDrink_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingHealthAndFitness_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingTravel_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingTranslator_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.BingSearch_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_solitaire_casual",
+      "display_name": "Remove Microsoft Solitaire Collection",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes the preinstalled Microsoft Solitaire Collection ad-supported game app and deprovisions it.",
+      "side_effects": [
+        "Microsoft Solitaire Collection is uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHWD2"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_outlook_new_and_teams_consumer",
+      "display_name": "Remove New Outlook & Personal Microsoft Teams",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes the consumer Microsoft Teams (personal) app, legacy Teams stub, and the web-backed New Outlook app.",
+      "side_effects": [
+        "Personal Teams chat integration and New Outlook mail client are removed; Enterprise Teams work/school app is unaffected."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.OutlookForWindows_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NRX63209R7B"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "MSTeams_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "XP8BT8DW290MP"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "MicrosoftTeams_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "XP8BT8DW290MP"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_cortana_and_tips",
+      "display_name": "Remove Cortana, Windows Tips (Get Started) & Feedback Hub",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes the deprecated Cortana voice assistant app, Windows Tips ('Get Started'), and Windows Feedback Hub.",
+      "side_effects": [
+        "Cortana, Tips, and Feedback Hub (Win+F) are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.549981C3F5F10_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NFFX4SZZ23L"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Getstarted_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRDTBJJ"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH4R32N"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_3d_and_mixed_reality",
+      "display_name": "Remove 3D Builder, 3D Viewer, Paint 3D, Print 3D & Mixed Reality Portal",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes legacy 3D modeling apps (3D Builder, 3D Viewer, Paint 3D, Print 3D) and the deprecated Windows Mixed Reality Portal.",
+      "side_effects": [
+        "3D Viewer, Paint 3D, and Mixed Reality Portal are removed (classic Paint is preserved)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.3DBuilder_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3T6"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Microsoft3DViewer_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH42THS"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MSPaint_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH5FV99"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Print3D_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH5FV99"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MixedReality.Portal_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NG1H8B3ZC7M"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_office_hub_and_companions",
+      "display_name": "Remove Microsoft 365 (Office) Hub, M365 Companions, Sway, Power BI & Journal",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes the preinstalled Microsoft 365 promotional hub ('Office'), M365 Companions, Sway, Power BI, and Microsoft Journal.",
+      "side_effects": [
+        "Does not affect full desktop Office/Microsoft 365 (Word, Excel, PowerPoint) installations."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRD29V9"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.M365Companions_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRD29V9"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Office.Sway_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRD2G0J"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MicrosoftPowerBIForWindows_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NTXR16HNW1T"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MicrosoftJournal_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9N318R854RHH"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_onenote_sticky_todo",
+      "display_name": "Remove OneNote UWP, Sticky Notes, Microsoft To Do & Whiteboard",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes the UWP Store versions of OneNote, Sticky Notes, Microsoft To Do, and Microsoft Whiteboard.",
+      "side_effects": [
+        "Sticky Notes, To Do, and Whiteboard UWP apps are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Office.OneNote_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVJL"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH4QGHW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Todos_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH5R558"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Whiteboard_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9MSPC6MP8FM4"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_power_automate_and_pc_manager",
+      "display_name": "Remove Power Automate Desktop, PC Manager & Family Safety",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes preinstalled Power Automate Desktop, Microsoft PC Manager, and Microsoft Family Safety apps.",
+      "side_effects": [
+        "Power Automate Desktop and Family Safety apps are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.PowerAutomateDesktop_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NFTCH6J7FHV"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.PCManager_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9PM860492SZD"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "MicrosoftCorporationII.MicrosoftFamily_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9PDJDJS743XF"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_skype_people_messaging_mail",
+      "display_name": "Remove Skype, People, Messaging, OneConnect & Legacy Mail/Calendar",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes Skype UWP, People contact bar, Messaging SMS app, Paid Wi-Fi & Cellular (OneConnect), and legacy Mail & Calendar.",
+      "side_effects": [
+        "Legacy UWP communication apps are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.SkypeApp_kzf8qxf38zg5c",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ364"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.People_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH10PG8"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Messaging_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJBQ6"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.OneConnect_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH5PNB1"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.windowscommunicationsapps_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVQM"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_maps_alarms_soundrecorder",
+      "display_name": "Remove Windows Maps, Sound Recorder & Network Speed Test",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes preinstalled Windows Maps, Windows Sound Recorder, and Network Speed Test apps.",
+      "side_effects": [
+        "Offline Maps and Sound Recorder UWP apps are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.WindowsMaps_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRDTBVB"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHWKN"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.NetworkSpeedTest_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH4NCB0"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_camera_and_alarms",
+      "display_name": "Remove Windows Camera & Alarms/Clock Apps",
+      "category": "Apps",
+      "rating": "expert",
+      "description": "Removes the built-in Windows Camera and Windows Alarms & Clock (Focus Sessions) UWP apps.",
+      "side_effects": [
+        "Built-in Camera app and Clock/Timer app are removed (webcams still work in Zoom/Teams/browsers)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.WindowsCamera_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJBBG"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.WindowsAlarms_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3PR"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_phone_link_and_cross_device",
+      "display_name": "Remove Phone Link (Your Phone) & Cross-Device Experience",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes the Microsoft Phone Link app and the background Cross-Device Experience host.",
+      "side_effects": [
+        "Android/iPhone Phone Link pairing and mobile camera integration are removed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.YourPhone_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NMPJ99VJBWV"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "MicrosoftWindows.CrossDevice_cw5n1h2txyewy",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NTXGKQ8P7N0"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_media_movies_tv",
+      "display_name": "Remove Movies & TV (ZuneVideo) & Media Player (ZuneMusic)",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes the Microsoft Movies & TV store video player and modern UWP Media Player.",
+      "side_effects": [
+        "Media files will open in another installed player (e.g., VLC or legacy WMP)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.ZuneVideo_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3P2"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.ZuneMusic_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3PT"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_xbox_gaming_apps",
+      "display_name": "Remove Xbox App, Xbox Game Bar & Overlays (Preserves Xbox Identity Provider)",
+      "category": "Apps",
+      "rating": "expert",
+      "description": "Removes the Xbox Gaming App, Console Companion, and Xbox Game Bar overlays while preserving Microsoft.XboxIdentityProvider so Store sign-in does not break.",
+      "side_effects": [
+        "Xbox Game Pass app and Win+G Game Bar overlay are uninstalled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.GamingApp_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9MV0B5HZVK9Z"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.XboxApp_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9MV0B5HZVK9Z"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.XboxGamingOverlay_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NZKPSTSNW4P"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.XboxGameOverlay_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NZKPSTSNW4P"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.XboxSpeechToTextOverlay_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NZKPSTSNW4P"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Microsoft.Xbox.TCUI_8wekyb3d8bbwe",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NZKPSTSNW4P"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_third_party_sponsored_bloat",
+      "display_name": "Remove Third-Party Promoted Apps (Candy Crush, TikTok, Spotify, Disney+, Netflix, Prime Video, Social)",
+      "category": "Apps",
+      "rating": "recommended",
+      "description": "Removes third-party consumer apps and games commonly preinstalled or stubbed on Windows 10 and Windows 11 consumer editions.",
+      "side_effects": [
+        "Uninstalls Candy Crush, Bubble Witch, TikTok, Spotify, Disney+, Netflix, Prime Video, Hulu, Facebook, Instagram, and LinkedIn UWP stubs."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "king.com.CandyCrushSaga_kgqvnymyfvs32",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH18846"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "king.com.CandyCrushSodaSaga_kgqvnymyfvs32",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH18846"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "king.com.BubbleWitch3Saga_kgqvnymyfvs32",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH18846"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "BytedancePte.Ltd.TikTok_6yccndn6064se",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NH2GPH4JZS4"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "SpotifyAB.SpotifyMusic_zpdnekdrzrea0",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NCBCSZSJRSB"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Disney.37853FC22B2CE_6rarf9sa4v8jt",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NXQXXLFST89"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "4DF9E0F8.Netflix_mcm4njqhnhss8",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3TJ"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AmazonVideo.PrimeVideo_pwbj9vvecjh7j",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9P6RC76MSMMJ"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "HULULLC.HULUPLUS_fphbd361v8tya",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ3L1"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "FACEBOOK.FACEBOOK_8xx8rvfyw5nnt",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ2WL"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "Facebook.Instagram_8xx8rvfyw5nnt",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9NBLGGH5L9XT"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "LinkedInforWindows_w1wdnht996qgy",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFJ4Q7"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "remove_oem_bloatware_hp_dell_lenovo",
+      "display_name": "Remove HP, Dell & Lenovo OEM Preinstalled Bloatware Suite",
+      "category": "Apps",
+      "rating": "limited",
+      "description": "Removes preinstalled OEM promotional utilities and telemetry apps from HP (myHP, JumpStarts, Support Assistant), Dell (SupportAssist, Digital Delivery), and Lenovo (Vantage).",
+      "side_effects": [
+        "OEM vendor companion apps are removed; hardware drivers and BIOS updates via Windows Update are unaffected."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [
+          "EnterpriseS",
+          "IoTEnterpriseS"
+        ],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.myHP_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.HPSupportAssistant_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.HPJumpStarts_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.HPPrivacySettings_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.HPQuickDrop_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "AD2F1837.HPAIExperienceCenter_v10z8vjag6ke6",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "DellInc.DellSupportAssistforPCs_htrsf667h5kn2",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "DellInc.DellDigitalDelivery_htrsf667h5kn2",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        },
+        {
+          "type": "appx_remove",
+          "scope": "all_users_and_provisioned",
+          "package_family_name": "E046963F.LenovoCompanion_k1h2ywk1493x8",
+          "probe": {
+            "kind": "appx_tristate"
+          },
+          "undo": {
+            "tier": "manual_assisted",
+            "route": "store",
+            "product_id": "9WZDNCRFHVFW"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_wpbt_bios_injection",
+      "display_name": "Disable Windows Platform Binary Table (Block Motherboard BIOS Bloatware Injection)",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Sets DisableWpbtExecution=1 so motherboard UEFI/BIOS firmware (ASUS Armoury Crate, Gigabyte Control Center, MSI, Razer) cannot inject executables into System32 at boot.",
+      "side_effects": [
+        "Prevents UEFI firmware from auto-dropping OEM updater services into Windows on boot."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager",
+          "name": "DisableWpbtExecution",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_consumer_features_cloud_content",
+      "display_name": "Disable Windows Consumer Features (Master Cloud-Suggested Apps Block)",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Enables the CloudContent\\DisableWindowsConsumerFeatures policy so Windows never auto-downloads third-party Store game/app stubs onto existing or newly created user accounts.",
+      "side_effects": [
+        "Blocks automatic cloud provisioning of promoted Store apps."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableWindowsConsumerFeatures",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_win32_long_paths",
+      "display_name": "Enable Win32 Long File Paths (> 260 Characters)",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Removes the legacy 260-character MAX_PATH limitation for Win32 applications, Git repositories, Node.js, and Python toolchains.",
+      "side_effects": [
+        "Manifest-aware Win32 applications and developer tools can access paths up to 32,767 characters."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+          "name": "LongPathsEnabled",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_explorer_auto_folder_discovery",
+      "display_name": "Disable File Explorer Automatic Folder Type Discovery (Fix Slow Media Folders)",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Locks File Explorer's default folder template to 'General Items' (NotSpecified) so opening a folder with images or MP3s does not stall for seconds switches columns.",
+      "side_effects": [
+        "All folders use the fast General Items detail columns unless customized manually."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": true,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags\\AllFolders\\Shell",
+          "name": "FolderType",
+          "value_type": "SZ",
+          "value": "NotSpecified",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": "NotSpecified"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "set_nonessential_services_manual",
+      "display_name": "Set Non-Essential Background Services to Manual (Maps, Fax, RetailDemo, Xbox Save, Insider)",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Configures rarely used background services (MapsBroker, Geolocation, Fax, RetailDemo, Windows Insider, Parental Controls, Wallet, Xbox Net/Save) to Manual startup so they use 0 RAM at boot without breaking on-demand features.",
+      "side_effects": [
+        "Services only start when an application explicitly requests them."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "service_startup",
+          "service_name": "MapsBroker",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "lfsvc",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "Fax",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "RetailDemo",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "wisvc",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "WpcMonSvc",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "WalletService",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "XblGameSave",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "XboxNetApiSvc",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        },
+        {
+          "type": "service_startup",
+          "service_name": "XboxGipSvc",
+          "start_type": "manual",
+          "probe": {
+            "kind": "service_start_type",
+            "expected": "manual"
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_start_type"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_utc_hardware_clock",
+      "display_name": "Set Hardware BIOS Clock to UTC (Fix Linux Dual-Boot Time Drift)",
+      "category": "Windows Update",
+      "rating": "limited",
+      "description": "Configures Windows to interpret the motherboard RTC hardware clock as UTC instead of local time, eliminating clock shifts when dual-booting Linux and Windows.",
+      "side_effects": [
+        "System clock stays synchronized across Linux and Windows dual-boot systems."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation",
+          "name": "RealTimeIsUniversal",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "always_show_scrollbars",
+      "display_name": "Always Show Full Scrollbars in Windows 11 & UWP Apps",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Disables auto-hiding thin scrollbars in Settings and WinUI/UWP apps so full scrollbars remain visible at all times.",
+      "side_effects": [
+        "Scrollbars are always visible without needing to hover the mouse over the window edge."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Control Panel\\Accessibility",
+          "name": "DynamicScrollbars",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "enable_verbose_bsod_and_logon",
+      "display_name": "Enable Verbose BSoD Stop Codes & Detailed Boot/Shutdown Status Messages",
+      "category": "Appearance",
+      "rating": "recommended",
+      "description": "Displays full hexadecimal bugcheck parameters on Blue/Black Screens of Death and shows detailed service/policy names during sign-in and shutdown.",
+      "side_effects": [
+        "Boot, shutdown, and crash screens display diagnostic status details."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\CrashControl",
+          "name": "DisplayParameters",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "VerboseStatus",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_dwm_mpo",
+      "display_name": "Disable DWM Multiplane Overlay (MPO) to Fix GPU Flicker & Stutter",
+      "category": "Appearance",
+      "rating": "expert",
+      "description": "Sets DWM OverlayTestMode=5 to disable Multiplane Overlay composition, fixing black-screen flickering and stutter in Chromium/Discord/games on NVIDIA and AMD GPUs.",
+      "side_effects": [
+        "Requires a system reboot to take effect."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": true
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\Dwm",
+          "name": "OverlayTestMode",
+          "value_type": "DWORD",
+          "value": 5,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 5
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_background_uwp_apps",
+      "display_name": "Disable Background UWP Store Apps Globally (Save RAM & Laptop Battery)",
+      "category": "Privacy and telemetry",
+      "rating": "limited",
+      "description": "Prevents Microsoft Store UWP apps from running background tasks and waking timers while their windows are closed.",
+      "side_effects": [
+        "UWP Store apps (e.g. Mail, Weather, Alarms) will not refresh in the background when closed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications",
+          "name": "GlobalUserDisabled",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsRunInBackground",
+          "value_type": "DWORD",
+          "value": 2,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 2
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "stop_edge_pdf_hijack",
+      "display_name": "Prevent Microsoft Edge from Hijacking .PDF File Associations",
+      "category": "Explorer",
+      "rating": "recommended",
+      "description": "Sets NoOpenWith and NoStaticDefaultVerb on MSEdgePDF so Windows Updates cannot silently reset your default PDF reader back to Microsoft Edge.",
+      "side_effects": [
+        "Prevents Edge from taking over .pdf file associations."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\MSEdgePDF",
+          "name": "NoOpenWith",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKCU",
+          "path": "Software\\Classes\\MSEdgePDF",
+          "name": "NoStaticDefaultVerb",
+          "value_type": "SZ",
+          "value": "",
+          "probe": {
+            "kind": "registry_equals",
+            "expected": ""
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "disable_extra_telemetry_tasks",
+      "display_name": "Disable USB CEIP, Feedback SIUF & Error Reporting Queue Scheduled Tasks",
+      "category": "Privacy and telemetry",
+      "rating": "recommended",
+      "description": "Disables additional background telemetry tasks from Windows10Debloater/winutil: UsbCeip, SIUF DmClient feedback harvesters, and Windows Error Reporting QueueReporting.",
+      "side_effects": [
+        "Background feedback prompts and crash queue uploads are disabled."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "continue_on_fail",
+      "actions": [
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        },
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClient",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        },
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClientOnScenarioDownload",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        },
+        {
+          "type": "scheduled_task_disable",
+          "task_path": "\\Microsoft\\Windows\\Windows Error Reporting\\QueueReporting",
+          "probe": {
+            "kind": "task_disabled",
+            "expected": true
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "re_enable_task"
+          }
+        }
+      ]
+    },
+    {
+      "manifest_version": 3,
+      "id": "block_razer_logitech_auto_install",
+      "display_name": "Block Automatic Razer Synapse & Logitech Companion Popups on USB Plug-in",
+      "category": "Windows Update",
+      "rating": "recommended",
+      "description": "Stops Windows Update driver metadata search from launching Razer Synapse / Logitech G-Hub installer popups when plugging in mice or keyboards.",
+      "side_effects": [
+        "Peripheral HID drivers still work natively without auto-launching vendor bloatware installers."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "applies_to": {
+        "os_min_build": 19045,
+        "sku_exclude": [],
+        "region_exclude": []
+      },
+      "ui_impact": {
+        "explorer_restart": false,
+        "reboot": false
+      },
+      "bundle_policy": "abort_on_fail",
+      "actions": [
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching",
+          "name": "SearchOrderConfig",
+          "value_type": "DWORD",
+          "value": 0,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 0
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        },
+        {
+          "type": "registry_set",
+          "hive": "HKLM",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DriverSearching",
+          "name": "DontSearchWindowsUpdate",
+          "value_type": "DWORD",
+          "value": 1,
+          "probe": {
+            "kind": "registry_equals",
+            "expected": 1
+          },
+          "undo": {
+            "tier": "automatic",
+            "strategy": "restore_prior_or_delete"
+          }
+        }
+      ]
+    }
+  ]
+}

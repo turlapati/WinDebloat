@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://windebloat.dev/schemas/manifest.v3.schema.json",
+  "title": "WinDebloat Manifest v3",
+  "description": "Schema for WinDebloat v3 manifest files and bundles.",
+  "type": "object",
+  "required": ["manifest_version", "bundles"],
+  "properties": {
+    "manifest_version": {
+      "type": "integer",
+      "const": 3
+    },
+    "manifest_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string",
+      "description": "Optional hex-encoded Ed25519 signature over canonical JSON of bundles."
+    },
+    "signer_key_id": {
+      "type": "string",
+      "description": "Optional identifier of the trusted public key."
+    },
+    "bundles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Bundle"
+      }
+    }
+  },
+  "$defs": {
+    "Bundle": {
+      "type": "object",
+      "required": [
+        "manifest_version",
+        "id",
+        "display_name",
+        "category",
+        "rating",
+        "description",
+        "side_effects",
+        "applies_to",
+        "ui_impact",
+        "bundle_policy",
+        "actions"
+      ],
+      "properties": {
+        "manifest_version": {
+          "type": "integer",
+          "const": 3
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Apps",
+            "Privacy and telemetry",
+            "AI features",
+            "Windows Update",
+            "Appearance",
+            "Start and taskbar",
+            "Explorer",
+            "Optional features"
+          ]
+        },
+        "rating": {
+          "type": "string",
+          "enum": ["recommended", "limited", "expert"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "side_effects": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "applies_to": {
+          "$ref": "#/$defs/AppliesTo"
+        },
+        "ui_impact": {
+          "$ref": "#/$defs/UiImpact"
+        },
+        "bundle_policy": {
+          "type": "string",
+          "enum": ["continue_on_fail", "abort_on_fail"]
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Action"
+          }
+        }
+      }
+    },
+    "AppliesTo": {
+      "type": "object",
+      "required": ["os_min_build", "sku_exclude", "region_exclude"],
+      "properties": {
+        "os_min_build": {
+          "type": "integer",
+          "minimum": 19041
+        },
+        "os_max_build": {
+          "type": "integer",
+          "minimum": 19041
+        },
+        "sku_exclude": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "region_exclude": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "effective_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "UiImpact": {
+      "type": "object",
+      "required": ["explorer_restart", "reboot"],
+      "properties": {
+        "explorer_restart": { "type": "boolean" },
+        "reboot": { "type": "boolean" }
+      }
+    },
+    "Action": {
+      "type": "object",
+      "required": ["type", "probe", "undo"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "registry_set",
+            "appx_remove",
+            "appx_provisioned_remove",
+            "scheduled_task_disable",
+            "service_startup",
+            "capability_remove",
+            "optional_feature"
+          ]
+        },
+        "hive": {
+          "type": "string",
+          "enum": ["HKLM", "HKCU", "DEFAULT", "ALL_PROFILES"]
+        },
+        "path": { "type": "string" },
+        "name": { "type": "string" },
+        "value_type": {
+          "type": "string",
+          "enum": ["DWORD", "QWORD", "SZ", "EXPAND_SZ", "MULTI_SZ", "BINARY", "DELETE"]
+        },
+        "value": {},
+        "scope": {
+          "type": "string",
+          "enum": ["current_user", "all_users", "all_users_and_provisioned"]
+        },
+        "package_family_name": {
+          "type": "string",
+          "pattern": "^[^*?]+$"
+        },
+        "task_path": { "type": "string" },
+        "service_name": { "type": "string" },
+        "start_type": {
+          "type": "string",
+          "enum": ["disabled", "manual", "automatic", "delayed_auto"]
+        },
+        "capability_name": { "type": "string" },
+        "feature_name": { "type": "string" },
+        "feature_enabled": { "type": "boolean" },
+        "probe": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "registry_equals",
+                "registry_absent",
+                "appx_tristate",
+                "provisioned_absent",
+                "task_disabled",
+                "service_start_type",
+                "capability_absent",
+                "feature_state"
+              ]
+            },
+            "expected": {}
+          }
+        },
+        "undo": {
+          "type": "object",
+          "required": ["tier"],
+          "properties": {
+            "tier": {
+              "type": "string",
+              "enum": ["automatic", "manual_assisted", "none"]
+            },
+            "strategy": { "type": "string" },
+            "route": {
+              "type": "string",
+              "enum": ["store", "winget"]
+            },
+            "product_id": { "type": "string" },
+            "package_id": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

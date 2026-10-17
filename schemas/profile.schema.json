@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://windebloat.dev/schemas/profile.schema.json",
+  "title": "WinDebloat Selection Profile",
+  "description": "Selection profile used by both the interactive UI and windebloat-cli.exe.",
+  "type": "object",
+  "required": ["profile_version", "id", "name", "bundles"],
+  "properties": {
+    "profile_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "bundles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]+$"
+      },
+      "uniqueItems": true
+    },
+    "custom_manifests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

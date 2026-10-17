@@ -1,0 +1,23 @@
+[package]
+name = "windebloat-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "windebloat-daemon"
+path = "src/main.rs"
+
+[features]
+# Enable only for Authenticode-signed production builds (see docs/RELEASING.md).
+require-signed-peers = ["windebloat-ipc/require-signed-peers"]
+
+[dependencies]
+windebloat-schema = { path = "../windebloat-schema" }
+windebloat-engine = { path = "../windebloat-engine" }
+windebloat-ipc = { path = "../windebloat-ipc" }
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+windows.workspace = true

@@ -1,0 +1,46 @@
+{
+  "appTitle": "WinDebloat",
+  "appSubtitle": "Transactional Windows Configuration & Debloat Engine",
+  "nav": {
+    "overview": "Overview",
+    "categories": "Categories",
+    "review": "Review (Dry Run)",
+    "apply": "Apply",
+    "history": "History & Undo",
+    "drift": "Drift Detection",
+    "about": "About & Attribution"
+  },
+  "ratings": {
+    "recommended": "Recommended",
+    "limited": "Limited (Review Side Effects)",
+    "expert": "Expert (Collapsed by Default)"
+  },
+  "driftBanner": {
+    "detectedTitle": "Configuration Drift Detected",
+    "detectedDesc": "items have changed since you applied them (for example, after a Windows Update).",
+    "intactTitle": "All Applied Items Intact",
+    "intactDesc": "Every verified journal item still matches the state you applied.",
+    "viewDriftBtn": "Review & Re-apply Drift"
+  },
+  "driftStatus": {
+    "intact": "Intact",
+    "reverted": "Has reverted to prior state",
+    "changed_by_other": "Has changed since you applied it",
+    "not_applicable": "Target no longer exists"
+  },
+  "undoTier": {
+    "automatic": "Automatic Undo (Journal Restorable)",
+    "manual_assisted": "Manual Assisted (Microsoft Store / Winget)",
+    "none": "Irreversible (Cannot be automatically undone)"
+  },
+  "actions": {
+    "reviewSelection": "Review Selection (Dry Run)",
+    "applyNow": "Apply Selected Changes",
+    "exportProfile": "Export Profile JSON",
+    "importProfile": "Import Profile JSON",
+    "loadCustomManifest": "Load Custom Manifest",
+    "exportJournal": "Export Journal JSON",
+    "reapplySelected": "Re-apply Selected Items",
+    "restartExplorer": "Restart Windows Explorer Now"
+  }
+}

@@ -1,0 +1,183 @@
+name: Release
+
+# Push a tag like 2026-10-17_Beta_0.9.101 (or run via workflow_dispatch) to build the MSI
+# and create a Draft GitHub Release ready to publish on the GitHub Releases page.
+
+on:
+  push:
+    tags:
+      - "20*"
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      create_draft_release:
+        description: "Create a Draft GitHub Release with the built MSI attached"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build MSI (Windows x64)
+    runs-on: windows-latest
+    permissions:
+      contents: write # create the Draft GitHub Release
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          # Keep the write-scoped token out of .git/config so build steps (npm, cargo) can't use it.
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/windebloat-ui/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          $cargoVersion = (Select-String -Path Cargo.toml -Pattern '^version\s*=\s*"([^"]+)"' |
+            Select-Object -First 1).Matches[0].Groups[1].Value
+          $tauriVersion = (Get-Content apps/windebloat-ui/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          if ($tauriVersion -and $tauriVersion -ne $cargoVersion) {
+            throw "tauri.conf.json version $tauriVersion does not match Cargo.toml version $cargoVersion."
+          }
+
+          $codeDisplayVersion = (Select-String -Path crates/windebloat-schema/src/lib.rs -Pattern 'None\s*=>\s*"([^"]+)"' |
+            Select-Object -First 1).Matches[0].Groups[1].Value
+
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $displayVersion = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            $displayVersion = $codeDisplayVersion
+          }
+
+          if ($displayVersion -notmatch '^\d{4}-\d{2}-\d{2}_(Alpha|Beta|Rel)_(\d+\.\d+\.\d+(?:\.\d+)?)$') {
+            throw "Release version must follow YYYY-MM-DD_<Alpha|Beta|Rel>_<x.y.z> (e.g. 2026-10-17_Beta_0.9.101). Got '$displayVersion'."
+          }
+          $channel = $Matches[1]
+          $numericVersion = $Matches[2]
+
+          if ($numericVersion -ne $cargoVersion) {
+            throw "Numeric version '$numericVersion' in '$displayVersion' does not match Cargo.toml version '$cargoVersion'."
+          }
+          if ($displayVersion -ne $codeDisplayVersion) {
+            throw "Display version '$displayVersion' does not match APP_DISPLAY_VERSION '$codeDisplayVersion' in crates/windebloat-schema/src/lib.rs."
+          }
+
+          $isPrerelease = if ($channel -in @('Alpha', 'Beta')) { 'true' } else { 'false' }
+
+          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
+          "numeric_version=$numericVersion" >> $env:GITHUB_OUTPUT
+          "is_prerelease=$isPrerelease" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved DisplayVersion=$displayVersion NumericVersion=$numericVersion Prerelease=$isPrerelease"
+
+      - name: Build Frontend Assets
+        run: |
+          npm --prefix apps/windebloat-ui ci
+          npm --prefix apps/windebloat-ui run build
+
+      - name: Run Unit & Manifest Verification Tests
+        run: |
+          cargo test -p windebloat-schema -p windebloat-engine -p windebloat-ipc
+          cargo test -p windebloat-ipc --features require-signed-peers
+
+      # Community build: binaries are unsigned, so the default feature set is used
+      # (unsigned peers accepted only from %ProgramFiles%\WinDebloat). Once binaries are
+      # Authenticode-signed, add: --features windebloat-ipc/require-signed-peers
+      - name: Build Release Binaries
+        env:
+          WINDEBLOAT_DISPLAY_VERSION: ${{ steps.version.outputs.display_version }}
+        run: cargo build --release --workspace
+
+      - name: Build MSI
+        shell: pwsh
+        env:
+          DISPLAY_VERSION: ${{ steps.version.outputs.display_version }}
+          NUMERIC_VERSION: ${{ steps.version.outputs.numeric_version }}
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $msi = "dist/WinDebloat-$env:DISPLAY_VERSION-x64.msi"
+          wix build installer/windebloat.wxs -arch x64 `
+            -d ProductVersion=$env:NUMERIC_VERSION `
+            -d DisplayVersion=$env:DISPLAY_VERSION `
+            -d BinDir="$PWD\target\release" `
+            -d RepoRoot="$PWD" `
+            -d IconFile="$PWD\apps\windebloat-ui\src-tauri\icons\icon.ico" `
+            -o $msi
+          if ($LASTEXITCODE -ne 0) { throw "wix build failed" }
+          $hash = (Get-FileHash $msi -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $(Split-Path $msi -Leaf)" | Set-Content "$msi.sha256" -Encoding ascii
+          Remove-Item dist/*.wixpdb -ErrorAction SilentlyContinue
+          Write-Host "SHA256: $hash"
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: WinDebloat-${{ steps.version.outputs.display_version }}-x64
+          path: dist/
+
+      - name: Create Draft GitHub Release
+        if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.create_draft_release)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          DISPLAY_VERSION: ${{ steps.version.outputs.display_version }}
+          IS_PRERELEASE: ${{ steps.version.outputs.is_prerelease }}
+        run: |
+          $msiName = "WinDebloat-$env:DISPLAY_VERSION-x64.msi"
+          $hash = (Get-Content "dist/$msiName.sha256").Split(' ')[0]
+          $tagName = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { $env:DISPLAY_VERSION }
+          @"
+          ## Install
+
+          Download **$msiName** below and run it. WinDebloat installs to ``C:\Program Files\WinDebloat`` and adds a Start Menu shortcut.
+
+          > **This build is not code-signed yet.** Windows will warn you because it doesn't recognize the publisher:
+          > - **SmartScreen** ("Windows protected your PC"): click **More info** → **Run anyway**.
+          > - **UAC** will show **Unknown publisher**. This is expected for this release.
+
+          ## Verify your download
+
+          ``````powershell
+          (Get-FileHash .\$msiName -Algorithm SHA256).Hash
+          ``````
+
+          It should match (case-insensitive):
+
+          ``````
+          $hash
+          ``````
+
+          The MSI is built for release ``$env:DISPLAY_VERSION`` by [this workflow run]($env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID).
+          "@ | Set-Content release-notes.md -Encoding utf8
+
+          $releaseArgs = @(
+            "release", "create", $tagName,
+            "dist/$msiName", "dist/$msiName.sha256",
+            "--draft",
+            "--title", "WinDebloat $env:DISPLAY_VERSION",
+            "--notes-file", "release-notes.md"
+          )
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $releaseArgs += "--verify-tag"
+          } else {
+            $releaseArgs += @("--target", $env:GITHUB_SHA)
+          }
+          if ($env:IS_PRERELEASE -eq 'true') {
+            $releaseArgs += "--prerelease"
+          }
+
+          gh @releaseArgs
